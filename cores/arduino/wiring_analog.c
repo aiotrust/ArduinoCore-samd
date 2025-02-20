@@ -129,9 +129,10 @@ uint32_t analogRead(uint32_t pin)
 {
   uint32_t valueRead = 0;
 
-  if (pin < A0) {
-    pin += A0;
-  }
+  // aiotrust: make this function work with all pins
+  // if (pin < A0) {
+  //   pin += A0;
+  // }
 
   pinPeripheral(pin, PIO_ANALOG);
 
