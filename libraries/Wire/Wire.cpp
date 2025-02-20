@@ -80,11 +80,14 @@ uint8_t TwoWire::requestFrom(uint8_t address, size_t quantity, bool stopBit)
 
     bool busOwner;
     // Connected to slave
+    int count = 0;
     for (byteRead = 1; byteRead < quantity && (busOwner = sercom->isBusOwnerWIRE()); ++byteRead)
     {
       sercom->prepareAckBitWIRE();                          // Prepare Acknowledge
-      sercom->prepareCommandBitsWire(WIRE_MASTER_ACT_READ); // Prepare the ACK command for the slave
-      rxBuffer.store_char(sercom->readDataWIRE());          // Read data and send the ACK
+      sercom->prepareCommandBitsWire(WIRE_MASTER_ACT_READ, &count); // Prepare the ACK command for the slave
+      rxBuffer.store_char(sercom->readDataWIRE(&count));          // Read data and send the ACK
+      if (count > 1000000)
+        return 0;
     }
     sercom->prepareNackBitWIRE();                           // Prepare NACK to stop slave transmission
     //sercom->readDataWIRE();                               // Clear data register to send NACK

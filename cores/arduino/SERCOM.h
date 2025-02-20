@@ -194,7 +194,7 @@ class SERCOM
     void disableWIRE( void );
     void prepareNackBitWIRE( void ) ;
     void prepareAckBitWIRE( void ) ;
-    void prepareCommandBitsWire(uint8_t cmd);
+    void prepareCommandBitsWire(uint8_t cmd, int* count = nullptr) ;
 		bool startTransmissionWIRE(uint8_t address, SercomWireReadWriteFlag flag) ;
 		bool sendDataMasterWIRE(uint8_t data) ;
 		bool sendDataSlaveWIRE(uint8_t data) ;
@@ -211,7 +211,7 @@ class SERCOM
 		bool isMasterReadOperationWIRE( void ) ;
     bool isRXNackReceivedWIRE( void ) ;
 		int availableWIRE( void ) ;
-		uint8_t readDataWIRE( void ) ;
+		uint8_t readDataWIRE( int* count = nullptr ) ;
 
 	private:
 		Sercom* sercom;

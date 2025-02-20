@@ -407,8 +407,11 @@ void SERCOM::disableWIRE()
   // Enable the I2C master mode
   sercom->I2CM.CTRLA.bit.ENABLE = 0 ;
 
+  int count = 0;
   while ( sercom->I2CM.SYNCBUSY.bit.ENABLE != 0 )
   {
+    if (count++ > 1000000)
+      return;
     // Waiting the enable bit from SYNCBUSY is equal to 0;
   }
 }
@@ -481,13 +484,15 @@ void SERCOM::prepareAckBitWIRE( void )
   }
 }
 
-void SERCOM::prepareCommandBitsWire(uint8_t cmd)
+void SERCOM::prepareCommandBitsWire(uint8_t cmd, int* count)
 {
   if(isMasterWIRE()) {
     sercom->I2CM.CTRLB.bit.CMD = cmd;
 
     while(sercom->I2CM.SYNCBUSY.bit.SYSOP)
     {
+      if(count != nullptr && (*count)++ > 1000000)
+        return;
       // Waiting for synchronization
     }
   } else {
@@ -497,7 +502,7 @@ void SERCOM::prepareCommandBitsWire(uint8_t cmd)
 
 bool SERCOM::startTransmissionWIRE(uint8_t address, SercomWireReadWriteFlag flag)
 {
-  // 7-bits address + 1-bits R/W
+  // 7-bits= address + 1-bits R/W
   address = (address << 0x1ul) | flag;
 
   // If another master owns the bus or the last bus owner has not properly
@@ -519,9 +524,13 @@ bool SERCOM::startTransmissionWIRE(uint8_t address, SercomWireReadWriteFlag flag
   // Address Transmitted
   if ( flag == WIRE_WRITE_FLAG ) // Write mode
   {
+    uint32_t count = 0;
     while( !sercom->I2CM.INTFLAG.bit.MB )
     {
       // Wait transmission complete
+      if (count++ > 1000000) {
+        return false;
+      }
     }
     // Check for loss of arbitration (multiple masters starting communication at the same time)
     if(!isBusOwnerWIRE())
@@ -532,11 +541,12 @@ bool SERCOM::startTransmissionWIRE(uint8_t address, SercomWireReadWriteFlag flag
   }
   else  // Read mode
   {
+    uint32_t count = 0;
     while( !sercom->I2CM.INTFLAG.bit.SB )
     {
         // If the slave NACKS the address, the MB bit will be set.
         // In that case, send a stop condition and return false.
-        if (sercom->I2CM.INTFLAG.bit.MB) {
+        if (sercom->I2CM.INTFLAG.bit.MB || (count++ > 1000000)) {
             sercom->I2CM.CTRLB.bit.CMD = 3; // Stop condition
             return false;
         }
@@ -546,7 +556,6 @@ bool SERCOM::startTransmissionWIRE(uint8_t address, SercomWireReadWriteFlag flag
     // Clean the 'Slave on Bus' flag, for further usage.
     //sercom->I2CM.INTFLAG.bit.SB = 0x1ul;
   }
-
 
   //ACK received (0: ACK, 1: NACK)
   if(sercom->I2CM.STATUS.bit.RXNACK)
@@ -661,12 +670,14 @@ int SERCOM::availableWIRE( void )
     return sercom->I2CS.INTFLAG.bit.DRDY;
 }
 
-uint8_t SERCOM::readDataWIRE( void )
+uint8_t SERCOM::readDataWIRE( int* count )
 {
   if(isMasterWIRE())
   {
     while( sercom->I2CM.INTFLAG.bit.SB == 0 && sercom->I2CM.INTFLAG.bit.MB == 0 )
     {
+      if(count != nullptr && (*count)++ > 1000000)
+        return 0;
       // Waiting complete receive
     }
 
