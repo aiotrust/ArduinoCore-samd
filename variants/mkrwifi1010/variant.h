@@ -29,7 +29,7 @@
 // Frequency of the board main oscillator
 #define VARIANT_MAINOSC (32768ul)
 
-// Master clock frequency
+// Core clock frequency
 #define VARIANT_MCK     (48000000ul)
 
 // Pins
@@ -64,27 +64,41 @@ extern "C" unsigned int PINCOUNT_fn();
 // #define digitalPinToTimer(P)
 
 //Battery
-#define ADC_BATTERY	(32u)
+// -------------------------------------
+#define ADC_BATTERY	      (32u)
 
-//NINA
-#define NINA_GPIO0  (30u)
-#define NINA_RESETN (31u)
-#define NINA_ACK    (35u)
+//WIFIC1510
+// -------------------------------------
 
+#define WIFI_ENABLE       (30u)
+#define WIFI_RESETN       (31u)
+#define WIFI_IRQ          (4u)
 // LEDs
-// ----
-#define PIN_LED     (6u)
-#define LED_BUILTIN PIN_LED
+// -------------------------------------
+#define PIN_LED_GREEN     (1u)
+#define LED_BUILTIN PIN_LED_GREEN
+#define PIN_LED_BLEU      (15u)
+#define PIN_LED_RED       (0u)
+
+//EEPROM
+// -------------------------------------
+#define EEPROM_WP         (5u)
+#define CS_EEPROM         (6u)
+
+//ETH
+// -------------------------------------
+#define ETH_RST           (7u)
+#define ETH_CS            (21u)
 
 // Analog pins
 // -----------
-#define PIN_A0 (15u)
-#define PIN_A1 (16u)
-#define PIN_A2 (17u)
-#define PIN_A3 (18u)
-#define PIN_A4 (19u)
-#define PIN_A5 (20u)
-#define PIN_A6 (21u)
+#define PIN_A0            (15u)
+#define PIN_A1            (16u)
+#define PIN_A2            (17u)
+#define PIN_A3            (18u)
+#define PIN_A4            (19u)
+#define PIN_A5            (20u)
+#define PIN_A6            (21u)
 static const uint8_t A0  = PIN_A0;
 static const uint8_t A1  = PIN_A1;
 static const uint8_t A2  = PIN_A2;
@@ -116,18 +130,28 @@ static const uint8_t SCK  = PIN_SPI_SCK;
 #define PIN_SPI1_MISO    (27u)
 #define PIN_SPI1_MOSI    (26u)
 #define PIN_SPI1_SCK     (29u)
-#define PIN_SPI1_SS      (28u)
+#define PIN_WIFI_CS      (03u)
 #define PERIPH_SPI1   sercom4
 #define PAD_SPI1_TX   SPI_PAD_0_SCK_3
 #define PAD_SPI1_RX   SERCOM_RX_PAD_1
-static const uint8_t SS1   = PIN_SPI1_SS;
+static const uint8_t SS1   = PIN_WIFI_CS;
 static const uint8_t MOSI1 = PIN_SPI1_MOSI;
 static const uint8_t MISO1 = PIN_SPI1_MISO;
 static const uint8_t SCK1  = PIN_SPI1_SCK;
 
-#define SPIWIFI_SS       PIN_SPI1_SS
-#define SPIWIFI_ACK      NINA_ACK
-#define SPIWIFI_RESET    (~NINA_RESETN)   // fixme! Inverted logic
+#define SPIWIFI_SS       PIN_WIFI_CS
+#define SPIWIFI_ACK      (35u)
+
+// Needed for SD library
+#define SDCARD_SPI      SPI1
+#define SDCARD_MISO_PIN PIN_SPI1_MISO
+#define SDCARD_MOSI_PIN PIN_SPI1_MOSI
+#define SDCARD_SCK_PIN  PIN_SPI1_SCK
+
+#define CS_SD           (17u)
+#define SDCARD_SS_PIN   CS_SD
+
+#define SD_CD           (2u)
 
 
 // Wire Interfaces
